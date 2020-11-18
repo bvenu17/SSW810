@@ -3,7 +3,7 @@
 this program consists of classes which contains all information about the students and instructors
 """
 import os as os
-from typing import IO, DefaultDict, Iterator, List, Any, Dict, Optional, Set, Tuple
+from typing import IO, DefaultDict, List, Any, Dict, Optional, Set, Tuple
 from collections import defaultdict, Counter
 from datetime import datetime, timedelta
 from prettytable import PrettyTable
