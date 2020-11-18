@@ -79,7 +79,7 @@ class University:
     def get_student_details(self, path: str) -> None:
         """reads the student file"""
         try:
-            for cwid, name, major in file_reader(path, 3, '\t', False):
+            for cwid, name, major in file_reader(path, 3, ';', True):
                 self.students_details[cwid] = Students(cwid, name, major)
         except(FileNotFoundError) as e:
             print(e)
@@ -87,7 +87,7 @@ class University:
     def get_grades_details(self, path: str) -> None:
         """reads the grades file"""
         try:
-            for student_cwid, course, grade, instructor_cwid in file_reader(path, 4, '\t', False):
+            for student_cwid, course, grade, instructor_cwid in file_reader(path, 4, '|', True):
                 try:
                     self.students_details[student_cwid].add_grade(
                         course, self.gpa[grade])
@@ -110,7 +110,7 @@ class University:
     def get_instructor_details(self, path: str) -> None:
         """reads the instructor file"""
         try:
-            for cwid, name, dept in file_reader(path, 3, '\t', False):
+            for cwid, name, dept in file_reader(path, 3, '|', True):
                 self.instructor_details[cwid] = Instructors(cwid, name, dept)
         except(FileNotFoundError, ValueError) as e:
             print(e)
