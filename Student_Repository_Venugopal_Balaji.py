@@ -18,17 +18,24 @@ class Students:
         self.cwid: str = cwid
         self.name: str = name
         self.major: str = major
-        self.allCourses: Dict[str, str] = dict()
+        self.allCourses: Dict[str, float] = dict()
         self.get_student_summary()
 
-    def add_grade(self, course: str, grade: str) -> None:
+    def add_grade(self, course: str, grade: float) -> None:
         """function to add grade of student of each course"""
         self.allCourses[course] = grade
 
     def get_student_summary(self) -> Tuple[str, str, list]:
         """return the summary of student details for pretty table"""
+        gpa : float = 0.0
+        if self.allCourses:
+            # print(self.allCourses)
+            gpa = round(sum(self.allCourses.values())/len(self.allCourses),2)
+            # print(gpa)
+
+       
         courses: List[str] = sorted(list(self.allCourses.keys()))
-        return self.cwid, self.name, courses
+        return self.cwid, self.name, courses, gpa
 
 
 class Instructors:
@@ -55,6 +62,10 @@ class Instructors:
 
 
 class University:
+    """this class is the repository for all information related to students and instructors"""
+    gpa: Dict[str, float] = {"A": 4.0, "A-": 3.75, "B+": 3.25, "B": 3.0,
+                             "B-": 2.75, "C+": 2.25, "C": 2.0, "C-": 0, "D+": 0, "D": 0, "D-": 0, "F": 0}
+
     def __init__(self, directory: str) -> None:
         """funtion to initialize constructor"""
         self.directory: str = directory
@@ -79,7 +90,7 @@ class University:
             for student_cwid, course, grade, instructor_cwid in file_reader(path, 4, '\t', False):
                 try:
                     self.students_details[student_cwid].add_grade(
-                        course, grade)
+                        course, self.gpa[grade])
                     self.instructor_details[instructor_cwid].cnt_students(
                         (course))
                 except(KeyError):
@@ -90,7 +101,7 @@ class University:
     def get_student_table(self) -> None:
         """to display the summary of student details"""
         stable: PrettyTable = PrettyTable(
-            field_names=["CWID", "Name", "Completed Courses"])
+            field_names=["CWID", "Name", "Completed Courses","GPA"])
         for s_cwid in self.students_details.keys():
             stable.add_row(
                 list(self.students_details[s_cwid].get_student_summary()))
@@ -106,7 +117,8 @@ class University:
 
     def get_instructors_table(self) -> None:
         """to display the summary of instructors details"""
-        itable: PrettyTable = PrettyTable(field_names=["CWID", "Name", "Dept", "Course", "Students"])
+        itable: PrettyTable = PrettyTable(
+            field_names=["CWID", "Name", "Dept", "Course", "Students"])
         for instructor_cwid in self.instructor_details.keys():
             for details in self.instructor_details[instructor_cwid].get_instructor_summary():
                 itable.add_row(details)
