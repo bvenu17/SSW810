@@ -18,44 +18,41 @@ class Students:
         self.cwid: str = cwid
         self.name: str = name
         self.major: str = major
-        self.required_courses : List[str] = required_courses.copy()
-        self.elective_courses : List[str] = elective_courses
-        self.remaining : List[str] = list()
-        self.electives : List[str] = list()
+        self.required_courses: List[str] = [] + required_courses
+        self.elective_courses: List[str] = elective_courses
+        self.electives: List[str] = list()
         self.allCourses: Dict[str, float] = dict()
         self.get_student_summary()
 
-    def add_grade(self, course: str, grade: float) -> None:
+    def add_grade(self, course: str, grade: str) -> None:
         """function to add grade of student of each course"""
-        # print(self.required_courses)
-        # print("First test")
-        self.allCourses[course] = grade
-        if grade > 0:
+        gpa: Dict[str, float] = {"A": 4.0, "A-": 3.75, "B+": 3.25, "B": 3.0,
+                                 "B-": 2.75, "C+": 2.25, "C": 2.0, "C-": 0, "D+": 0, "D": 0, "D-": 0, "F": 0}
+
+        grade_point = gpa[grade]
+
+        self.allCourses[course] = grade_point
+
+        if grade_point > 0:
             if course in self.required_courses:
                 self.required_courses.remove(course)
-            # print(self.required_courses)
-            # self.remaining = self.required_courses
-        
-        if grade > 0 and course in self.elective_courses:
+
+        if grade_point > 0 and course in self.elective_courses:
             self.electives = []
         else:
-            self.electives=self.elective_courses
-        
-
-            
-        
+            self.electives = self.elective_courses
 
     def get_student_summary(self) -> Tuple[str, str, list]:
         """return the summary of student details for pretty table"""
-        gpa : float = 0.0
-        if self.allCourses:
-            # print(self.allCourses)
-            gpa = round(sum(self.allCourses.values())/len(self.allCourses),2)
-            # print(gpa)
 
-       
+        gpa: float = 0.0
+
+        if self.allCourses:
+            gpa = sum(self.allCourses.values())/len(self.allCourses)
+
         courses: List[str] = sorted(list(self.allCourses.keys()))
-        return self.cwid, self.name, courses,self.required_courses,self.electives, gpa
+
+        return self.cwid, self.name, courses, self.required_courses, self.electives, round(gpa, 2)
 
 
 class Instructors:
@@ -80,12 +77,14 @@ class Instructors:
                 [self.cwid, self.name, self.department, key, values])
         return instructor_summary
 
+
 class Majors:
     """this class stores information for required course and electives for each major"""
+
     def __init__(self) -> None:
         """function to initialize constructor"""
-        self.required_courses : List[str] = list() 
-        self.elective_courses : List[str] = list() 
+        self.required_courses: List[str] = list()
+        self.elective_courses: List[str] = list()
 
     def set_major_details(self, flag: str, courses: str) -> None:
         """function to save required and electives for each major"""
@@ -93,37 +92,38 @@ class Majors:
             self.required_courses.append(courses)
         if flag == 'E':
             self.elective_courses.append(courses)
-    
+
     def get_required_courses(self) -> List[str]:
         return self.required_courses
-    
+
     def get_elective_courses(self) -> List[str]:
         return self.elective_courses
+
+
 class University:
     """this class is the repository for all information related to students and instructors"""
-    gpa: Dict[str, float] = {"A": 4.0, "A-": 3.75, "B+": 3.25, "B": 3.0,
-                             "B-": 2.75, "C+": 2.25, "C": 2.0, "C-": 0, "D+": 0, "D": 0, "D-": 0, "F": 0}
 
     def __init__(self, directory: str) -> None:
         """funtion to initialize constructor"""
         self.directory: str = directory
         self.students_details: Dict[str, Students] = dict()
         self.instructor_details: Dict[str, Instructors] = dict()
-        self.major_details: Dict[str,Majors] = dict()
-        self.get_majors_details(os.path.join(self.directory,"majors.txt"))
+        self.major_details: Dict[str, Majors] = dict()
+        self.get_majors_details(os.path.join(self.directory, "majors.txt"))
         self.get_student_details(os.path.join(self.directory, "students.txt"))
-        self.get_instructor_details(os.path.join(self.directory, 'instructors.txt'))
+        self.get_instructor_details(os.path.join(
+            self.directory, 'instructors.txt'))
         self.get_grades_details(os.path.join(self.directory, 'grades.txt'))
 
     def get_majors_details(self, path: str):
         """reads the majors file"""
         try:
-            for major,flag,course in file_reader(path,3,'\t',True):
+            for major, flag, course in file_reader(path, 3, '\t', True):
                 if major in self.major_details:
-                    self.major_details[major].set_major_details(flag,course)
+                    self.major_details[major].set_major_details(flag, course)
                 else:
                     self.major_details[major] = Majors()
-                    self.major_details[major].set_major_details(flag,course)
+                    self.major_details[major].set_major_details(flag, course)
         except(FileNotFoundError, ValueError) as e:
             print(e)
 
@@ -132,7 +132,8 @@ class University:
         try:
             for cwid, name, major in file_reader(path, 3, ';', True):
                 if major in self.major_details:
-                    self.students_details[cwid] = Students(cwid, name, major,self.major_details[major].get_required_courses(),self.major_details[major].get_elective_courses())
+                    self.students_details[cwid] = Students(cwid, name, major, self.major_details[major].get_required_courses(
+                    ), self.major_details[major].get_elective_courses())
                 else:
                     print("no details found for this major in the majors.txt file")
         except(FileNotFoundError) as e:
@@ -144,7 +145,7 @@ class University:
             for student_cwid, course, grade, instructor_cwid in file_reader(path, 4, '|', True):
                 try:
                     self.students_details[student_cwid].add_grade(
-                        course, self.gpa[grade])
+                        course, grade)
                     self.instructor_details[instructor_cwid].cnt_students(
                         (course))
                 except(KeyError):
@@ -155,7 +156,7 @@ class University:
     def get_student_table(self) -> None:
         """to display the summary of student details"""
         stable: PrettyTable = PrettyTable(
-            field_names=["CWID", "Name", "Completed Courses","Required Courses","Elective Courses","GPA"])
+            field_names=["CWID", "Name", "Completed Courses", "Required Courses", "Elective Courses", "GPA"])
         for s_cwid in self.students_details.keys():
             stable.add_row(
                 list(self.students_details[s_cwid].get_student_summary()))
@@ -178,14 +179,16 @@ class University:
                 itable.add_row(details)
         return itable
 
-    def get_majors_table(self)-> None:
+    def get_majors_table(self) -> None:
         """to display the summary of majors table"""
         mtable: PrettyTable = PrettyTable(
-            field_names = ["Major","Required Courses","Electives"]
+            field_names=["Major", "Required Courses", "Electives"]
         )
         for major in self.major_details.keys():
-            mtable.add_row([major,self.major_details[major].get_required_courses(),self.major_details[major].get_elective_courses()])
+            mtable.add_row([major, self.major_details[major].get_required_courses(
+            ), self.major_details[major].get_elective_courses()])
         return mtable
+
 
 def main():
     """ main program """
@@ -194,6 +197,7 @@ def main():
     print(uni.get_student_table())
     print(uni.get_instructors_table())
     print(uni.get_majors_table())
+
 
 if __name__ == "__main__":
     main()
