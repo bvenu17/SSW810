@@ -60,7 +60,19 @@ class Instructors:
                 [self.cwid, self.name, self.department, key, values])
         return instructor_summary
 
+class Majors:
+    """this class stores information for required course and electives for each major"""
+    def __init__(self) -> None:
+        """function to initialize constructor"""
+        self.required_courses : List[str] = list() 
+        self.elective_courses : List[str] = list() 
 
+    def set_major_details(self, flag: str, courses: str) -> None:
+        """function to save required and electives for each major"""
+        if flag == 'R':
+            self.required_courses.append(courses)
+        if flag == 'E':
+            self.elective_courses.append(courses)
 class University:
     """this class is the repository for all information related to students and instructors"""
     gpa: Dict[str, float] = {"A": 4.0, "A-": 3.75, "B+": 3.25, "B": 3.0,
@@ -71,6 +83,7 @@ class University:
         self.directory: str = directory
         self.students_details: Dict[str, Students] = dict()
         self.instructor_details: Dict[str, Instructors] = dict()
+        self.major_details: Dict[str,Majors] = dict()
         self.get_student_details(os.path.join(self.directory, "students.txt"))
         self.get_instructor_details(os.path.join(
             self.directory, 'instructors.txt'))
@@ -123,6 +136,18 @@ class University:
             for details in self.instructor_details[instructor_cwid].get_instructor_summary():
                 itable.add_row(details)
         return itable
+
+    def get_majors_details(self, path: str):
+        try:
+            for major,flag,course in file_reader(path,3,'\t',True):
+                if major in self.major_details:
+                    self.major_details[major].set_major_details(flag,course)
+                else:
+                    self.major_details[major] = Majors()
+                    self.major_details[major].set_major_details(flag,course)
+        except(FileNotFoundError, ValueError) as e:
+            print(e)
+
 
 
 def main():
