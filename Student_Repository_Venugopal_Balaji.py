@@ -115,7 +115,7 @@ class University:
             self.directory, 'instructors.txt'))
         self.get_grades_details(os.path.join(self.directory, 'grades.txt'))
 
-    def get_majors_details(self, path: str):
+    def get_majors_details(self, path: str) -> None:
         """reads the majors file"""
         try:
             for major, flag, course in file_reader(path, 3, '\t', True):
@@ -197,7 +197,6 @@ def main():
     print(uni.get_student_table())
     print(uni.get_instructors_table())
     print(uni.get_majors_table())
-
 
 if __name__ == "__main__":
     main()
