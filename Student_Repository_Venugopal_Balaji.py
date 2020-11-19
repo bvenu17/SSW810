@@ -156,7 +156,7 @@ class University:
     def get_student_table(self) -> None:
         """to display the summary of student details"""
         stable: PrettyTable = PrettyTable(
-            field_names=["CWID", "Name", "Completed Courses", "Required Courses", "Elective Courses", "GPA"])
+            field_names=["CWID", "Name", "Completed Courses", "Remaining Required", "Remaining Elective", "GPA"])
         for s_cwid in self.students_details.keys():
             stable.add_row(
                 list(self.students_details[s_cwid].get_student_summary()))
