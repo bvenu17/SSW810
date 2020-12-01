@@ -22,6 +22,7 @@ class Students:
         self.elective_courses: List[str] = elective_courses
         self.electives: List[str] = list()
         self.allCourses: Dict[str, float] = dict()
+        self.completedCourses: Dict[str, float] = dict()
         self.get_student_summary()
 
     def add_grade(self, course: str, grade: str) -> None:
@@ -30,9 +31,10 @@ class Students:
                                  "B-": 2.75, "C+": 2.25, "C": 2.0, "C-": 0, "D+": 0, "D": 0, "D-": 0, "F": 0}
 
         grade_point = gpa[grade]
-
+        if grade_point>0:
+            self.completedCourses[course] = grade_point
         self.allCourses[course] = grade_point
-
+        
         if grade_point > 0:
             if course in self.required_courses:
                 self.required_courses.remove(course)
@@ -50,7 +52,7 @@ class Students:
         if self.allCourses:
             gpa = sum(self.allCourses.values())/len(self.allCourses)
 
-        courses: List[str] = sorted(list(self.allCourses.keys()))
+        courses: List[str] = sorted(list(self.completedCourses.keys()))
 
         return self.cwid, self.name, courses, self.required_courses, self.electives, round(gpa, 2)
 
@@ -130,7 +132,7 @@ class University:
     def get_student_details(self, path: str) -> None:
         """reads the student file"""
         try:
-            for cwid, name, major in file_reader(path, 3, ';', True):
+            for cwid, name, major in file_reader(path, 3, '\t', True):
                 if major in self.major_details:
                     self.students_details[cwid] = Students(cwid, name, major, self.major_details[major].get_required_courses(
                     ), self.major_details[major].get_elective_courses())
@@ -142,7 +144,7 @@ class University:
     def get_grades_details(self, path: str) -> None:
         """reads the grades file"""
         try:
-            for student_cwid, course, grade, instructor_cwid in file_reader(path, 4, '|', True):
+            for student_cwid, course, grade, instructor_cwid in file_reader(path, 4, '\t', True):
                 try:
                     self.students_details[student_cwid].add_grade(
                         course, grade)
@@ -165,7 +167,7 @@ class University:
     def get_instructor_details(self, path: str) -> None:
         """reads the instructor file"""
         try:
-            for cwid, name, dept in file_reader(path, 3, '|', True):
+            for cwid, name, dept in file_reader(path, 3, '\t', True):
                 self.instructor_details[cwid] = Instructors(cwid, name, dept)
         except(FileNotFoundError, ValueError) as e:
             print(e)
