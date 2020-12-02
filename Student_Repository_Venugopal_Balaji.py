@@ -3,6 +3,7 @@
 this program consists of classes which contains all information about the students and instructors
 """
 import os as os
+import sqlite3
 from typing import IO, DefaultDict, List, Any, Dict, Optional, Set, Tuple
 from collections import defaultdict, Counter
 from datetime import datetime, timedelta
@@ -31,10 +32,10 @@ class Students:
                                  "B-": 2.75, "C+": 2.25, "C": 2.0, "C-": 0, "D+": 0, "D": 0, "D-": 0, "F": 0}
 
         grade_point = gpa[grade]
-        if grade_point>0:
+        if grade_point > 0:
             self.completedCourses[course] = grade_point
         self.allCourses[course] = grade_point
-        
+
         if grade_point > 0:
             if course in self.required_courses:
                 self.required_courses.remove(course)
@@ -116,6 +117,7 @@ class University:
         self.get_instructor_details(os.path.join(
             self.directory, 'instructors.txt'))
         self.get_grades_details(os.path.join(self.directory, 'grades.txt'))
+        self.query: str = """select s.Name,s.CWID,g.Course,g.Grade,i.Name from students as s join grades as g join instructors as i where s.CWID=g.StudentCWID and g.InstructorCWID=i.CWID order by s.Name;"""
 
     def get_majors_details(self, path: str) -> None:
         """reads the majors file"""
@@ -191,6 +193,39 @@ class University:
             ), self.major_details[major].get_elective_courses()])
         return mtable
 
+    def student_grades_details_db(self, db_path):
+        """to display table for grades of students from sqlite db"""
+        try:
+            db: sqlite3.Connection = sqlite3.connect(db_path)
+        except sqlite3.OperationalError as e:
+            print(e)
+        else:
+            result: List[Tuple[str]] = []
+            try:
+                for row in db.execute(self.query):
+                    result.append(row)
+                db.close()
+                return result
+            except sqlite3.OperationalError as e:
+                print(e)
+
+    def student_grades_table_db(self, db_path):
+        """to display table for grades of students from sqlite db"""
+        try:
+            db: sqlite3.Connection = sqlite3.connect(db_path)
+        except sqlite3.OperationalError as e:
+            print(e)
+        else:
+            pt: PrettyTable = PrettyTable(
+                field_names=["Name", "CWID", "Course", "Grade", "Instructor"])
+            try:
+                for row in db.execute(self.query):
+                    pt.add_row(row)
+                db.close()
+                return pt
+            except sqlite3.OperationalError as e:
+                print(e)
+
 
 def main():
     """ main program """
@@ -199,6 +234,9 @@ def main():
     print(uni.get_student_table())
     print(uni.get_instructors_table())
     print(uni.get_majors_table())
+    print(uni.student_grades_table_db(
+        "Student_Repository_Venugopal_Balaji.sqlite"))
+
 
 if __name__ == "__main__":
     main()
