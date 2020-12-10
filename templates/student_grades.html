@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block body %}
+<table class="table table-bordered table-hover table-responsive">
+    
+    <thead class="thead-dark">
+    <tr>
+        <th scope="col">Student</th>
+        <th scope="col">CWID</th>
+        <th scope="col">Course</th>
+        <th scope="col">Grade</th>
+        <th scope="col">Instructor</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for s in students %}
+    <tr>
+        <td>{{s[0]}}</td>
+        <td>{{s[1]}}</td>
+        <td>{{s[2]}}</td>
+        <td>{{s[3]}}</td>
+        <td>{{s[4]}}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<a href="/"><button type="button" class="btn btn-light">back</button></a>
+{% endblock %}
